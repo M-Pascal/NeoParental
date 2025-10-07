@@ -56,11 +56,11 @@ pip install -r requirements.txt
 ## Contributing
 To contribute to the NeoParental project:
 
-Fork the repository
-Create a feature branch (git checkout -b new_ideas)
-Commit your changes (git commit -m 'Added features')
-Push to the branch (git push origin new_ideas)
-Open a Pull Request
+1. Fork the repository
+2. Create a feature branch (git checkout -b new_ideas)
+3. Commit your changes (git commit -m 'Added features')
+4. Push to the branch (git push origin new_ideas)
+5. Open a Pull Request
 
 ## Acknowledgements
 - Emmanuel Annor - Project Supervisor
