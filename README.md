@@ -8,7 +8,7 @@ This project was developed as a BSc. in Software Engineering thesis by Pascal Mu
 - Link to [Figma Design Prototype](https://www.figma.com/proto/VEoDYp7vbH6ahN5du9bKWb/Untitled?node-id=0-1&t=tz9GGUXJTJ9oRpkr-1)
 - Link to [GitHub Repository](https://github.com/M-Pascal/NeoParental.git)
 - Link to [Demo_video](https://youtu.be/mBu3su7Ymdk)
-
+[![YouTube Video mBu3su7Ymdk](https://img.youtube.com/vi/mBu3su7Ymdk/maxresdefault.jpg)](https://www.youtube.com/watch?v=mBu3su7Ymdk)
 ## Project Structure
 ```
 NeoParental/
