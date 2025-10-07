@@ -4,9 +4,10 @@ NeoParental is an AI-powered mobile application designed to support new parents 
 
 This project was developed as a BSc. in Software Engineering thesis by Pascal Mugisha, supervised by Mr. Emmanuel, and intended to be completed in November 2025.
 
+#### Important Links to Explore:
 - Link to [Figma Design Prototype](https://www.figma.com/proto/VEoDYp7vbH6ahN5du9bKWb/Untitled?node-id=0-1&t=tz9GGUXJTJ9oRpkr-1)
 - Link to [GitHub Repository](https://github.com/M-Pascal/NeoParental.git)
-- Link to Demo_video
+- Link to [Demo_video](https://youtu.be/mBu3su7Ymdk)
 
 ## Project Structure
 ```
