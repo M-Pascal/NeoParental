@@ -47,7 +47,7 @@ cd NeoParental/
 2. Create Virtual Environment:
 ```bash
 python -m venv myvenv
-source venv/Scripts/activate  # On MacOs: venv\bin\activate
+source myenv/Scripts/activate  # On macOS: myenv\bin\activate
 ```
 3. Install dependencies:
 ```bash
