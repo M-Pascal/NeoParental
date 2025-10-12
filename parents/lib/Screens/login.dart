@@ -30,10 +30,10 @@ class _LoginPageState extends State<LoginPage> {
                 Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFF6B35), // Orange color
+                    color: Color.fromARGB(255, 214, 70, 18),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(45.0),
+                      bottomRight: Radius.circular(45.0),
                     ),
                   ),
                   child: SafeArea(
@@ -50,18 +50,19 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 5),
                           // Welcome text
                           const Text(
                             'Welcome\nto\nNeoParental',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 32,
+                              fontSize: 36,
                               fontWeight: FontWeight.w900,
+                              height: 1.0, // Reduced line spacing
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 25),
                           const Text(
                             'Login into your account',
                             style: TextStyle(
@@ -85,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         const SizedBox(height: 40),
 
-                        // Login Form
+                        // Login Form for user
                         Form(
                           key: _formKey,
                           child: Column(
@@ -200,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        const Color(0xFFD2691E), // Dark orange
+                                        const Color(0xFFFB8239),
                                     foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15),
@@ -210,13 +211,13 @@ class _LoginPageState extends State<LoginPage> {
                                   child: const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.login, size: 22),
-                                      SizedBox(width: 10),
+                                      Icon(Icons.login_rounded, size: 23),
+                                      SizedBox(width: 12),
                                       Text(
                                         'Login',
                                         style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
                                         ),
                                       ),
                                     ],
@@ -232,13 +233,15 @@ class _LoginPageState extends State<LoginPage> {
 
                         // Copyright at bottom
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
+                          padding: const EdgeInsets.only(bottom: 7.0),
                           child: Text(
                             'Copyright ©2025',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: Colors.grey[500],
                               fontWeight: FontWeight.w500,
+                              letterSpacing: 0.9,
+                              fontStyle: FontStyle.italic
                             ),
                           ),
                         ),
