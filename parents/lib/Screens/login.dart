@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -200,8 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color(0xFFFB8239),
+                                    backgroundColor: const Color(0xFFFB8239),
                                     foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15),
@@ -237,12 +237,11 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'Copyright ©2025',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.9,
-                              fontStyle: FontStyle.italic
-                            ),
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.9,
+                                fontStyle: FontStyle.italic),
                           ),
                         ),
                       ],
@@ -267,8 +266,19 @@ class _LoginPageState extends State<LoginPage> {
       const SnackBar(
         content: Text('Login successful!'),
         backgroundColor: Colors.green,
+        duration: Duration(seconds: 1),
       ),
     );
+
+    // Navigate to home screen after a short delay
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
+    });
   }
 
   @override
