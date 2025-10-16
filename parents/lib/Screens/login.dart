@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './home.dart';
+import './main_navigation.dart';
 import './register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -382,12 +382,12 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
-    // Navigate to home screen after a short delay
+    // Navigate to main navigation screen after a short delay
     Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => const MainNavigationPage(),
         ),
       );
     });

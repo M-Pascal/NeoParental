@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './login.dart';
+import './record.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -279,13 +280,25 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _selectedIndex = index;
         });
-        // TODO: Add navigation logic for each tab
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$label pressed!'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
+
+        // Navigation logic for each tab
+        if (index == 1 && label == 'Listen') {
+          // Navigate to record page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RecordPage(),
+            ),
+          );
+        } else {
+          // For other tabs, show snackbar for now
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$label pressed!'),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(12),
