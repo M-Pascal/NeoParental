@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './home.dart';
+import './register.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
+  bool _agreeToTerms = false;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 25),
                         ],
                       ),
                     ),
@@ -188,7 +190,68 @@ class _LoginPageState extends State<LoginPage> {
                                 },
                               ),
 
-                              const SizedBox(height: 40),
+                              const SizedBox(height: 8),
+
+                              // Forgot Password section
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    // TODO: Add forgot password functionality
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Forgot password feature coming soon!'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Forgot Password?',
+                                    style: TextStyle(
+                                      color: Color(0xFFD2691E),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 2),
+
+                              // Terms and Conditions Checkbox
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: _agreeToTerms,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _agreeToTerms = value ?? false;
+                                      });
+                                    },
+                                    activeColor: const Color(0xFFD2691E),
+                                    checkColor: Colors.white,
+                                  ),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _agreeToTerms = !_agreeToTerms;
+                                        });
+                                      },
+                                      child: const Text(
+                                        'I agree to terms and conditions',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
 
                               // Login Button
                               SizedBox(
@@ -197,6 +260,18 @@ class _LoginPageState extends State<LoginPage> {
                                 child: ElevatedButton(
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
+                                      if (!_agreeToTerms) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Please agree to terms and conditions'),
+                                            backgroundColor: Colors.red,
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                        return;
+                                      }
                                       _performLogin();
                                     }
                                   },
@@ -223,6 +298,43 @@ class _LoginPageState extends State<LoginPage> {
                                     ],
                                   ),
                                 ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              // Don't have account section
+                              Column(
+                                children: [
+                                  const Text(
+                                    "Don't have account yet?",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RegisterPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Create new one',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFFD2691E),
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Color(0xFFD2691E),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
