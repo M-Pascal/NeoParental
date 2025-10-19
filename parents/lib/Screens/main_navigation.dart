@@ -26,9 +26,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _selectedIndex != 3
+      appBar: _selectedIndex != 3 && _selectedIndex != 1
           ? AppBar(
-              // Hide AppBar only for History page (index 3)
+              // Hide AppBar for History page (index 3) and Record page (index 1)
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
@@ -75,7 +75,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 const SizedBox(width: 8),
               ],
             )
-          : null, // No AppBar for History page
+          : null, // No AppBar for History and Record pages
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(16),
