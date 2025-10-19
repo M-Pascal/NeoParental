@@ -18,10 +18,10 @@ class _RecordPageState extends State<RecordPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header Section with Orange Background
+        // Header Section
         _buildHeaderSection(),
 
-        // Content Section with padding - Made scrollable to prevent overflow
+        // Main Content
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
@@ -38,7 +38,6 @@ class _RecordPageState extends State<RecordPage> {
                 // Auto Detect Section
                 _buildAutoDetectSection(),
 
-                // Bottom padding to ensure content is not cut off by bottom navigation
                 const SizedBox(height: 100),
               ],
             ),
@@ -305,31 +304,84 @@ class _RecordPageState extends State<RecordPage> {
     );
   }
 
+  // File picker simulation (replace with actual implementation when packages work)
   void _selectAudioFile() async {
-    print('Starting file selection...'); // Debug log
+    try {
+      // Show file selection dialog
+      final selectedFile = await _showFileSelectionDialog();
 
-    // Simulate file selection for now (replace with actual file picker implementation)
-    await Future.delayed(const Duration(seconds: 1));
+      if (selectedFile != null) {
+        setState(() {
+          _selectedFileName = selectedFile;
+          _selectedFilePath = "/storage/audio/$selectedFile";
+        });
 
-    // Simulate selecting a file
-    setState(() {
-      _selectedFileName = "sample_audio.mp3";
-      _selectedFilePath = "/storage/sample_audio.mp3";
-    });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Audio file selected: $_selectedFileName'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No file selected.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting file: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Audio file selected: sample_audio.mp3'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
+  // Simulate file selection dialog
+  Future<String?> _showFileSelectionDialog() async {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Audio File'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Choose an audio file to upload:'),
+              const SizedBox(height: 16),
+              ...[
+                'baby_cry_1.mp3',
+                'baby_laugh_2.wav',
+                'baby_hungry_3.m4a',
+                'baby_tired_4.aac',
+              ].map((fileName) => ListTile(
+                    leading:
+                        const Icon(Icons.audiotrack, color: Color(0xFFFF6B35)),
+                    title: Text(fileName),
+                    onTap: () => Navigator.of(context).pop(fileName),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _uploadAudioFile() async {
     if (_selectedFileName == null || _selectedFilePath == null) return;
 
-    // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
@@ -351,10 +403,8 @@ class _RecordPageState extends State<RecordPage> {
       ),
     );
 
-    // Simulate upload process (replace with actual upload logic)
     await Future.delayed(const Duration(seconds: 2));
 
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$_selectedFileName uploaded successfully!'),
@@ -363,7 +413,6 @@ class _RecordPageState extends State<RecordPage> {
       ),
     );
 
-    // Reset selection after upload
     setState(() {
       _selectedFileName = null;
       _selectedFilePath = null;
@@ -381,7 +430,6 @@ class _RecordPageState extends State<RecordPage> {
       return;
     }
 
-    // Show analyzing message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Analyzing $_selectedFileName...'),
@@ -390,19 +438,16 @@ class _RecordPageState extends State<RecordPage> {
       ),
     );
 
-    // Simulate analysis process (replace with actual ML analysis)
     await Future.delayed(const Duration(seconds: 3));
 
-    // Show analysis result (placeholder)
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Analysis complete! Check the results in History.'),
         backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
+        duration: Duration(seconds: 3),
       ),
     );
 
-    // Reset file selection after analysis
     setState(() {
       _selectedFileName = null;
       _selectedFilePath = null;
@@ -425,27 +470,21 @@ class _RecordPageState extends State<RecordPage> {
       ),
       child: Padding(
         padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top +
-              10, // Status bar height + extra padding
+          top: MediaQuery.of(context).padding.top + 10,
           left: 20.0,
           right: 20.0,
           bottom: 30.0,
         ),
         child: Column(
           children: [
-            // Top row with menu and notification icons
+            // Top bar
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Menu Icon
                 IconButton(
-                  icon: const Icon(
-                    Icons.menu_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  icon: const Icon(Icons.menu_rounded,
+                      color: Colors.white, size: 28),
                   onPressed: () {
-                    // Navigate to home page via main navigation
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -454,14 +493,9 @@ class _RecordPageState extends State<RecordPage> {
                     );
                   },
                 ),
-
-                // Notification Icon
                 IconButton(
-                  icon: const Icon(
-                    Icons.notifications_outlined,
-                    color: Colors.white,
-                    size: 26,
-                  ),
+                  icon: const Icon(Icons.notifications_outlined,
+                      color: Colors.white, size: 26),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -473,10 +507,7 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 15),
-
-            // Title
             const Text(
               'Listening\nOutput',
               style: TextStyle(
@@ -487,10 +518,7 @@ class _RecordPageState extends State<RecordPage> {
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 12),
-
-            // Subtitle
             const Text(
               'Upload or Record audio sound.',
               style: TextStyle(
