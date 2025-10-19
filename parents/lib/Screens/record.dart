@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import './main_navigation.dart';
 
 class RecordPage extends StatefulWidget {
@@ -114,7 +115,7 @@ class _RecordPageState extends State<RecordPage> {
                 child: ElevatedButton.icon(
                   onPressed: _selectAudioFile,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('Browse Files'),
+                  label: const Text('Select Audio File'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B35),
                     foregroundColor: Colors.white,
@@ -304,16 +305,22 @@ class _RecordPageState extends State<RecordPage> {
     );
   }
 
-  // File picker simulation (replace with actual implementation when packages work)
+  // Real file picker implementation
   void _selectAudioFile() async {
     try {
-      // Show file selection dialog
-      final selectedFile = await _showFileSelectionDialog();
+      // Use FilePicker to select audio files from local storage
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg', 'wma'],
+        allowMultiple: false,
+      );
 
-      if (selectedFile != null) {
+      if (result != null && result.files.isNotEmpty) {
+        PlatformFile file = result.files.first;
+
         setState(() {
-          _selectedFileName = selectedFile;
-          _selectedFilePath = "/storage/audio/$selectedFile";
+          _selectedFileName = file.name;
+          _selectedFilePath = file.path ?? '';
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -335,48 +342,12 @@ class _RecordPageState extends State<RecordPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error selecting file: $e'),
+          content: Text('Error accessing file picker: $e'),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
-  }
-
-  // Simulate file selection dialog
-  Future<String?> _showFileSelectionDialog() async {
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Audio File'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Choose an audio file to upload:'),
-              const SizedBox(height: 16),
-              ...[
-                'baby_cry_1.mp3',
-                'baby_laugh_2.wav',
-                'baby_hungry_3.m4a',
-                'baby_tired_4.aac',
-              ].map((fileName) => ListTile(
-                    leading:
-                        const Icon(Icons.audiotrack, color: Color(0xFFFF6B35)),
-                    title: Text(fileName),
-                    onTap: () => Navigator.of(context).pop(fileName),
-                  )),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _uploadAudioFile() async {
