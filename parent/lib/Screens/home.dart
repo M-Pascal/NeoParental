@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './login.dart';
-import './record.dart';
+import './main_navigation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +11,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0; // Track selected navigation item
+
+  // Sample history data for statistics
+  final List<HistoryItem> _historyItems = [
+    HistoryItem(
+      id: '1',
+      date: DateTime.now().subtract(const Duration(hours: 2)),
+      duration: const Duration(seconds: 15),
+      analysis: 'Hunger',
+      confidence: 89,
+      status: AnalysisStatus.completed,
+    ),
+    HistoryItem(
+      id: '2',
+      date: DateTime.now().subtract(const Duration(days: 1)),
+      duration: const Duration(seconds: 23),
+      analysis: 'Discomfort',
+      confidence: 76,
+      status: AnalysisStatus.completed,
+    ),
+    HistoryItem(
+      id: '3',
+      date: DateTime.now().subtract(const Duration(days: 2)),
+      duration: const Duration(seconds: 18),
+      analysis: 'Tired',
+      confidence: 82,
+      status: AnalysisStatus.completed,
+    ),
+    HistoryItem(
+      id: '4',
+      date: DateTime.now().subtract(const Duration(days: 3)),
+      duration: const Duration(seconds: 12),
+      analysis: 'Pain',
+      confidence: 65,
+      status: AnalysisStatus.lowConfidence,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +61,7 @@ class _HomePageState extends State<HomePage> {
             // Navigate back to login page
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (context) => const LoginPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const LoginPage()),
             );
           },
         ),
@@ -35,8 +69,11 @@ class _HomePageState extends State<HomePage> {
         actions: [
           // Notification Icon
           IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: Colors.black87, size: 26),
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.black87,
+              size: 26,
+            ),
             onPressed: () {
               // TODO: Add notification functionality
               ScaffoldMessenger.of(context).showSnackBar(
@@ -49,8 +86,11 @@ class _HomePageState extends State<HomePage> {
           ),
           // Profile Icon
           IconButton(
-            icon: const Icon(Icons.person_outline,
-                color: Colors.black87, size: 26),
+            icon: const Icon(
+              Icons.person_outline,
+              color: Colors.black87,
+              size: 26,
+            ),
             onPressed: () {
               // TODO: Add profile functionality
               ScaffoldMessenger.of(context).showSnackBar(
@@ -98,10 +138,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Text(
                           'Good Morning,',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
+                          style: TextStyle(fontSize: 16, color: Colors.white70),
                         ),
                         const Text(
                           'John Doe',
@@ -163,14 +200,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // Quick Actions Section
+            // Statistics Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Quick Actions',
+                    'Statistics',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -178,45 +215,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          icon: Icons.baby_changing_station,
-                          title: 'Baby Monitor',
-                          color: Colors.blue,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          icon: Icons.schedule,
-                          title: 'Schedule',
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          icon: Icons.health_and_safety,
-                          title: 'Health',
-                          color: Colors.red,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          icon: Icons.tips_and_updates,
-                          title: 'Tips',
-                          color: Colors.purple,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildStatisticsSection(),
                 ],
               ),
             ),
@@ -242,26 +241,9 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(
-              icon: Icons.home,
-              label: 'Home',
-              index: 0,
-            ),
-            _buildNavItem(
-              icon: Icons.hearing,
-              label: 'Listen',
-              index: 1,
-            ),
-            _buildNavItem(
-              icon: Icons.chat,
-              label: 'Chat',
-              index: 2,
-            ),
-            _buildNavItem(
-              icon: Icons.history,
-              label: 'History',
-              index: 3,
-            ),
+            _buildNavItem(icon: Icons.home, label: 'Home', index: 0),
+            _buildNavItem(icon: Icons.hearing, label: 'Audio', index: 1),
+            _buildNavItem(icon: Icons.history, label: 'History', index: 2),
           ],
         ),
       ),
@@ -281,83 +263,157 @@ class _HomePageState extends State<HomePage> {
           _selectedIndex = index;
         });
 
-        // Navigation logic for each tab
-        if (index == 1 && label == 'Listen') {
-          // Navigate to record page
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const RecordPage(),
-            ),
-          );
-        } else {
-          // For other tabs, show snackbar for now
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$label pressed!'),
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        }
+        // Navigate to main navigation page with the selected index
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+        );
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(25),
         ),
-        child: Icon(
-          icon,
-          color: isSelected ? const Color(0xFFFF6B35) : Colors.white,
-          size: 24,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFFFF6B35) : Colors.white,
+              size: 24,
+            ),
+            // Show text for all buttons when selected
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFFFF6B35),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickActionCard({
-    required IconData icon,
+  Widget _buildStatisticsSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            title: 'This Week',
+            value:
+                '${_historyItems.where((item) => item.date.isAfter(DateTime.now().subtract(const Duration(days: 7)))).length}',
+            icon: Icons.calendar_today,
+            color: Colors.blue,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Avg Confidence',
+            value: '${_calculateAverageConfidence()}%',
+            icon: Icons.trending_up,
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Most Common',
+            value: _getMostCommonAnalysis(),
+            icon: Icons.analytics,
+            color: Colors.purple,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
     required String title,
+    required String value,
+    required IconData icon,
     required Color color,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
-            blurRadius: 8,
+            blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              size: 32,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 12),
+          Icon(icon, size: 24, color: color),
+          const SizedBox(height: 8),
           Text(
-            title,
+            value,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+
+  // Helper methods
+  int _calculateAverageConfidence() {
+    if (_historyItems.isEmpty) return 0;
+    int total = _historyItems.fold(0, (sum, item) => sum + item.confidence);
+    return total ~/ _historyItems.length;
+  }
+
+  String _getMostCommonAnalysis() {
+    if (_historyItems.isEmpty) return 'N/A';
+    Map<String, int> analysisCount = {};
+    for (var item in _historyItems) {
+      analysisCount[item.analysis] = (analysisCount[item.analysis] ?? 0) + 1;
+    }
+    return analysisCount.entries
+        .reduce((a, b) => a.value > b.value ? a : b)
+        .key;
+  }
 }
+
+// Data models
+class HistoryItem {
+  final String id;
+  final DateTime date;
+  final Duration duration;
+  final String analysis;
+  final int confidence;
+  final AnalysisStatus status;
+
+  HistoryItem({
+    required this.id,
+    required this.date,
+    required this.duration,
+    required this.analysis,
+    required this.confidence,
+    required this.status,
+  });
+}
+
+enum AnalysisStatus { completed, lowConfidence, failed }

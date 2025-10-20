@@ -60,12 +60,7 @@ class _HistoryPageState extends State<HistoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-
-                // Statistics Cards
-                _buildStatisticsSection(),
-
-                const SizedBox(height: 24),
+                const SizedBox(height: 4),
 
                 // History List Header
                 Row(
@@ -94,7 +89,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // History List
                 Expanded(
@@ -133,7 +128,8 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       child: Padding(
         padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top +
+          top:
+              MediaQuery.of(context).padding.top +
               10, // Status bar height + extra padding
           left: 20.0,
           right: 20.0,
@@ -214,86 +210,6 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  Widget _buildStatisticsSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            title: 'This Week',
-            value:
-                '${_historyItems.where((item) => item.date.isAfter(DateTime.now().subtract(const Duration(days: 7)))).length}',
-            icon: Icons.calendar_today,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            title: 'Avg Confidence',
-            value: '${_calculateAverageConfidence()}%',
-            icon: Icons.trending_up,
-            color: Colors.green,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            title: 'Most Common',
-            value: _getMostCommonAnalysis(),
-            icon: Icons.analytics,
-            color: Colors.purple,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 24, color: color),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHistoryCard(HistoryItem item) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -343,10 +259,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                       Text(
                         '${item.confidence}% confidence',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -361,17 +274,11 @@ class _HistoryPageState extends State<HistoryPage> {
             children: [
               Text(
                 _formatDateTime(item.date),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               Text(
                 'Duration: ${_formatDuration(item.duration)}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -394,7 +301,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 child: OutlinedButton.icon(
                   onPressed: () => _shareAnalysis(item),
                   icon: const Icon(Icons.description_outlined, size: 18),
-                  label: const Text('Share'),
+                  label: const Text('Details'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey[600],
                     side: BorderSide(color: Colors.grey[300]!),
@@ -449,11 +356,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.history, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Recordings Yet',
@@ -466,10 +369,7 @@ class _HistoryPageState extends State<HistoryPage> {
           const SizedBox(height: 8),
           Text(
             'Start recording your baby\'s cries to see analysis history here',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -478,22 +378,6 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   // Helper methods
-  int _calculateAverageConfidence() {
-    if (_historyItems.isEmpty) return 0;
-    int total = _historyItems.fold(0, (sum, item) => sum + item.confidence);
-    return total ~/ _historyItems.length;
-  }
-
-  String _getMostCommonAnalysis() {
-    if (_historyItems.isEmpty) return 'N/A';
-    Map<String, int> analysisCount = {};
-    for (var item in _historyItems) {
-      analysisCount[item.analysis] = (analysisCount[item.analysis] ?? 0) + 1;
-    }
-    return analysisCount.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
-  }
 
   Color _getAnalysisColor(String analysis) {
     switch (analysis.toLowerCase()) {
@@ -555,12 +439,105 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _shareAnalysis(HistoryItem item) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Sharing analysis: ${item.analysis}'),
-        backgroundColor: const Color(0xFFFF6B35),
-        duration: const Duration(seconds: 2),
-      ),
+    _showRecommendationDialog(item);
+  }
+
+  void _showRecommendationDialog(HistoryItem item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 8,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Colored header section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFFF6B35), Color(0xFFD2691E)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                child: const Text(
+                  'Recommendation',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              // White content section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 20),
+                    // Close button
+                    Align(
+                      alignment: Alignment.center,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Close',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B35),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          minimumSize: const Size(100, 36),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -584,8 +561,4 @@ class HistoryItem {
   });
 }
 
-enum AnalysisStatus {
-  completed,
-  lowConfidence,
-  failed,
-}
+enum AnalysisStatus { completed, lowConfidence, failed }
