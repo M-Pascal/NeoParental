@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './login.dart';
 import './record.dart';
 import './history.dart';
+import './profile.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -69,10 +70,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                     size: 26,
                   ),
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Profile pressed!'),
-                        duration: Duration(seconds: 1),
+                    // Navigate to profile page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
                       ),
                     );
                   },

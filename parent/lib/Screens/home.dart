@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './login.dart';
 import './main_navigation.dart';
+import './profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -92,12 +93,10 @@ class _HomePageState extends State<HomePage> {
               size: 26,
             ),
             onPressed: () {
-              // TODO: Add profile functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Profile pressed!'),
-                  duration: Duration(seconds: 1),
-                ),
+              // Navigate to profile page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
