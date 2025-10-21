@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import './main_navigation.dart';
+import './profile.dart';
+import './register.dart';
+import './history.dart';
 
 class RecordPage extends StatefulWidget {
   const RecordPage({super.key});
@@ -10,41 +13,47 @@ class RecordPage extends StatefulWidget {
 }
 
 class _RecordPageState extends State<RecordPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isAutoDetectActive = false;
   String? _selectedFileName;
   String? _selectedFilePath;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header Section
-        _buildHeaderSection(),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      drawer: _buildSideDrawer(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Section
+          _buildHeaderSection(),
 
-        // Main Content
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
+          // Main Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
 
-                // Upload Audio Section
-                _buildUploadSection(),
+                  // Upload Audio Section
+                  _buildUploadSection(),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // Auto Detect Section
-                _buildAutoDetectSection(),
+                  // Auto Detect Section
+                  _buildAutoDetectSection(),
 
-                const SizedBox(height: 100),
-              ],
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -129,13 +138,15 @@ class _RecordPageState extends State<RecordPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed:
-                      _selectedFileName != null ? _uploadAudioFile : null,
+                  onPressed: _selectedFileName != null
+                      ? _uploadAudioFile
+                      : null,
                   icon: const Icon(Icons.cloud_upload),
                   label: const Text('Upload'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _selectedFileName != null ? Colors.green : Colors.grey,
+                    backgroundColor: _selectedFileName != null
+                        ? Colors.green
+                        : Colors.grey,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -227,10 +238,7 @@ class _RecordPageState extends State<RecordPage> {
                     SizedBox(height: 4),
                     Text(
                       'Automatically detect and analyze baby sounds',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
                     ),
                   ],
                 ),
@@ -264,8 +272,9 @@ class _RecordPageState extends State<RecordPage> {
                             ? 'Auto detection activated!'
                             : 'Auto detection deactivated!',
                       ),
-                      backgroundColor:
-                          _isAutoDetectActive ? Colors.green : Colors.grey,
+                      backgroundColor: _isAutoDetectActive
+                          ? Colors.green
+                          : Colors.grey,
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -290,10 +299,7 @@ class _RecordPageState extends State<RecordPage> {
                   Expanded(
                     child: Text(
                       'Auto detection is active. The app will listen for baby sounds in the background.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.blue),
                     ),
                   ),
                 ],
@@ -453,20 +459,21 @@ class _RecordPageState extends State<RecordPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.menu_rounded,
-                      color: Colors.white, size: 28),
+                  icon: const Icon(
+                    Icons.menu_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MainNavigationPage(),
-                      ),
-                    );
+                    _scaffoldKey.currentState?.openDrawer();
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_outlined,
-                      color: Colors.white, size: 26),
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                    size: 26,
+                  ),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -503,6 +510,195 @@ class _RecordPageState extends State<RecordPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSideDrawer() {
+    return Drawer(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            // Header section with close button
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 20,
+                left: 20,
+                right: 20,
+                bottom: 20,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFF6B35), Color(0xFFD2691E)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Menu items
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                children: [
+                  _buildMenuItem(
+                    icon: Icons.home_outlined,
+                    title: 'Home',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MainNavigationPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.hearing_outlined,
+                    title: 'Audio',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      // Already on audio/record page
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.history_outlined,
+                    title: 'History',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HistoryPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.person_outline,
+                    title: 'Profile',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 40, thickness: 1),
+                  _buildMenuItem(
+                    icon: Icons.logout_outlined,
+                    title: 'Logout',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _showLogoutDialog();
+                    },
+                    isLogout: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isLogout = false,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isLogout ? Colors.red : const Color(0xFFFF6B35),
+        size: 24,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: isLogout ? Colors.red : Colors.black87,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: Colors.black54),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './login.dart';
+import './register.dart';
 import './record.dart';
 import './history.dart';
 import './profile.dart';
@@ -12,6 +12,7 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
 
   // List of pages to display
@@ -24,7 +25,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
+      drawer: _buildSideDrawer(),
       appBar: _selectedIndex != 2 && _selectedIndex != 1
           ? AppBar(
               // Hide AppBar for History page (index 2) and Record page (index 1)
@@ -37,11 +40,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   size: 28,
                 ),
                 onPressed: () {
-                  // Navigate back to login page
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
+                  _scaffoldKey.currentState?.openDrawer();
                 },
               ),
               centerTitle: true,
@@ -152,6 +151,108 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSideDrawer() {
+    return Drawer(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF6A82FB), Color(0xFFFC5C7D)],
+          ),
+        ),
+        child: Column(
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.transparent),
+              child: Center(
+                child: Text(
+                  'NeoParental',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildMenuItem(Icons.home, 'Home', () {
+                    Navigator.pop(context);
+                    setState(() => _selectedIndex = 0);
+                  }),
+                  _buildMenuItem(Icons.mic, 'Audio', () {
+                    Navigator.pop(context);
+                    setState(() => _selectedIndex = 1);
+                  }),
+                  _buildMenuItem(Icons.history, 'History', () {
+                    Navigator.pop(context);
+                    setState(() => _selectedIndex = 2);
+                  }),
+                  _buildMenuItem(Icons.person, 'Profile', () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+                  }),
+                  const Divider(color: Colors.white30),
+                  _buildMenuItem(Icons.logout, 'Logout', () {
+                    _showLogoutDialog();
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: onTap,
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterPage()),
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

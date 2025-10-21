@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import './main_navigation.dart';
+import './profile.dart';
+import './register.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -9,6 +11,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   // Sample history data
   final List<HistoryItem> _historyItems = [
     HistoryItem(
@@ -47,68 +50,73 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header Section with Orange Background
-        _buildHeaderSection(),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
+      drawer: _buildSideDrawer(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Section with Orange Background
+          _buildHeaderSection(),
 
-        // Content Section with padding
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
+          // Content Section with padding
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
 
-                // History List Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Recent Recordings',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // TODO: Navigate to detailed history
-                      },
-                      child: const Text(
-                        'View All',
+                  // History List Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Recent Recordings',
                         style: TextStyle(
-                          color: Color(0xFFFF6B35),
-                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      TextButton(
+                        onPressed: () {
+                          // TODO: Navigate to detailed history
+                        },
+                        child: const Text(
+                          'View All',
+                          style: TextStyle(
+                            color: Color(0xFFFF6B35),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                // History List
-                Expanded(
-                  child: _historyItems.isNotEmpty
-                      ? ListView.separated(
-                          itemCount: _historyItems.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            return _buildHistoryCard(_historyItems[index]);
-                          },
-                        )
-                      : _buildEmptyState(),
-                ),
-              ],
+                  // History List
+                  Expanded(
+                    child: _historyItems.isNotEmpty
+                        ? ListView.separated(
+                            itemCount: _historyItems.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              return _buildHistoryCard(_historyItems[index]);
+                            },
+                          )
+                        : _buildEmptyState(),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -149,13 +157,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     size: 28,
                   ),
                   onPressed: () {
-                    // Navigate to home page via main navigation
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MainNavigationPage(),
-                      ),
-                    );
+                    _scaffoldKey.currentState?.openDrawer();
                   },
                 ),
 
@@ -536,6 +538,118 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSideDrawer() {
+    return Drawer(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF6A82FB), Color(0xFFFC5C7D)],
+          ),
+        ),
+        child: Column(
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.transparent),
+              child: Center(
+                child: Text(
+                  'NeoParental',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildMenuItem(Icons.home, 'Home', () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationPage(),
+                      ),
+                    );
+                  }),
+                  _buildMenuItem(Icons.mic, 'Audio', () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationPage(),
+                      ),
+                    );
+                  }),
+                  _buildMenuItem(Icons.history, 'History', () {
+                    Navigator.pop(context);
+                    // Already on history page
+                  }),
+                  _buildMenuItem(Icons.person, 'Profile', () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilePage(),
+                      ),
+                    );
+                  }),
+                  const Divider(color: Colors.white30),
+                  _buildMenuItem(Icons.logout, 'Logout', () {
+                    _showLogoutDialog();
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: onTap,
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterPage()),
+                  (route) => false,
+                );
+              },
+            ),
+          ],
         );
       },
     );
