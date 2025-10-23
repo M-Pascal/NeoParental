@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './main_navigation.dart';
 import './profile.dart';
 import './register.dart';
+import './chat.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -550,7 +551,7 @@ class _HistoryPageState extends State<HistoryPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF6A82FB), Color(0xFFFC5C7D)],
+            colors: [Color(0xFFFF6B35), Color(0xFFD2691E)],
           ),
         ),
         child: Column(
@@ -593,6 +594,13 @@ class _HistoryPageState extends State<HistoryPage> {
                   _buildMenuItem(Icons.history, 'History', () {
                     Navigator.pop(context);
                     // Already on history page
+                  }),
+                  _buildMenuItem(Icons.chat, 'Chat', () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ChatPage()),
+                    );
                   }),
                   _buildMenuItem(Icons.person, 'Profile', () {
                     Navigator.pop(context);

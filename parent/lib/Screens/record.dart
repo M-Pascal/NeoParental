@@ -4,6 +4,7 @@ import './main_navigation.dart';
 import './profile.dart';
 import './register.dart';
 import './history.dart';
+import './chat.dart';
 
 class RecordPage extends StatefulWidget {
   const RecordPage({super.key});
@@ -593,6 +594,19 @@ class _RecordPageState extends State<RecordPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const HistoryPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    icon: Icons.chat_outlined,
+                    title: 'Chat',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChatPage(),
                         ),
                       );
                     },

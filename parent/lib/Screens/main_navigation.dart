@@ -3,6 +3,7 @@ import './register.dart';
 import './record.dart';
 import './history.dart';
 import './profile.dart';
+import './chat.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -20,6 +21,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     const HomeContentPage(),
     const RecordPage(),
     const HistoryPage(),
+    const ChatPage(),
   ];
 
   @override
@@ -28,9 +30,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       drawer: _buildSideDrawer(),
-      appBar: _selectedIndex != 2 && _selectedIndex != 1
+      appBar: _selectedIndex != 2 && _selectedIndex != 1 && _selectedIndex != 3
           ? AppBar(
-              // Hide AppBar for History page (index 2) and Record page (index 1)
+              // Hide AppBar for History page (index 2), Record page (index 1), and Chat page (index 3)
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
@@ -103,6 +105,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             _buildNavItem(icon: Icons.home, label: 'Home', index: 0),
             _buildNavItem(icon: Icons.hearing, label: 'Audio', index: 1),
             _buildNavItem(icon: Icons.history, label: 'History', index: 2),
+            _buildNavItem(icon: Icons.chat, label: 'Chat', index: 3),
           ],
         ),
       ),
@@ -161,7 +164,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF6A82FB), Color(0xFFFC5C7D)],
+            colors: [Color(0xFFFF6B35), Color(0xFFD2691E)],
           ),
         ),
         child: Column(
@@ -194,6 +197,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   _buildMenuItem(Icons.history, 'History', () {
                     Navigator.pop(context);
                     setState(() => _selectedIndex = 2);
+                  }),
+                  _buildMenuItem(Icons.chat, 'Chat', () {
+                    Navigator.pop(context);
+                    setState(() => _selectedIndex = 3);
                   }),
                   _buildMenuItem(Icons.person, 'Profile', () {
                     Navigator.pop(context);

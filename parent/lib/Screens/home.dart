@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
               size: 26,
             ),
             onPressed: () {
-              // TODO: Add notification functionality
+              // notification functionality
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Notifications pressed!'),
@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          const SizedBox(width: 8), // Small padding from edge
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -243,6 +243,7 @@ class _HomePageState extends State<HomePage> {
             _buildNavItem(icon: Icons.home, label: 'Home', index: 0),
             _buildNavItem(icon: Icons.hearing, label: 'Audio', index: 1),
             _buildNavItem(icon: Icons.history, label: 'History', index: 2),
+            _buildNavItem(icon: Icons.chat, label: 'Chat', index: 3),
           ],
         ),
       ),
