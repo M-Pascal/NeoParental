@@ -25,6 +25,15 @@ class AuthProvider with ChangeNotifier {
   /// Initialize auth state listener
   AuthProvider() {
     _initAuthListener();
+    _checkCurrentUser();
+  }
+
+  /// Check current user on startup
+  Future<void> _checkCurrentUser() async {
+    _currentUser = _authService.currentUser;
+    if (_currentUser != null) {
+      notifyListeners();
+    }
   }
 
   /// Listen to auth state changes

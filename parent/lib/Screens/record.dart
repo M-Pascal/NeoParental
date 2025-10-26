@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
+import '../providers/audio_provider.dart';
+import '../providers/auth_provider.dart';
 import './main_navigation.dart';
 import './profile.dart';
 import './register.dart';
@@ -360,41 +363,109 @@ class _RecordPageState extends State<RecordPage> {
   void _uploadAudioFile() async {
     if (_selectedFileName == null || _selectedFilePath == null) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
+    // Get audio provider and auth provider
+    final audioProvider = Provider.of<AudioProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Check if user is authenticated
+    if (authProvider.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please sign in to upload audio files'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Show upload progress dialog
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-            SizedBox(width: 16),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
             Text('Uploading audio file...'),
           ],
         ),
-        backgroundColor: Colors.blue,
-        duration: Duration(seconds: 3),
       ),
     );
 
-    await Future.delayed(const Duration(seconds: 2));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$_selectedFileName uploaded successfully!'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
+    // Upload file with basic analysis data
+    final success = await audioProvider.uploadAudioFile(
+      filePath: _selectedFilePath!,
+      userId: authProvider.currentUser!.uid,
+      fileName: _selectedFileName,
+      analysisData: {
+        'analysis': 'Pending Analysis',
+        'confidence': 0,
+        'duration': 0,
+        'status': 'uploaded',
+        'notes': 'Uploaded via mobile app on ${DateTime.now().toString()}',
+      },
     );
 
-    setState(() {
-      _selectedFileName = null;
-      _selectedFilePath = null;
-    });
+    // Close progress dialog
+    if (mounted) Navigator.of(context).pop();
+
+    if (success) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('$_selectedFileName uploaded successfully!'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'VIEW',
+              textColor: Colors.white,
+              onPressed: () {
+                // Navigate to history
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                );
+              },
+            ),
+          ),
+        );
+
+        setState(() {
+          _selectedFileName = null;
+          _selectedFilePath = null;
+        });
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(audioProvider.errorMessage ?? 'Upload failed'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _analyzeSelectedFile() async {

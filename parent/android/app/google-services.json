@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "73562282065",
+    "firebase_url": "https://neoparentalapp-default-rtdb.firebaseio.com",
+    "project_id": "neoparentalapp",
+    "storage_bucket": "neoparentalapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73562282065:android:39d36f38f43e5106828070",
+        "android_client_info": {
+          "package_name": "com.example.parent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsYUAQVVCPIT6fgEM0Whyh0vDn7o4oo1E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

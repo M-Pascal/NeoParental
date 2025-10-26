@@ -1,24 +1,35 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
-/// Service class for handling Authentication (non-Firebase version)
-/// This is a mock/local authentication service
-///
-/// BYPASS MODE ENABLED:
-/// - No registration required
-/// - Any email/password combination will work
-/// - Users are auto-created on first login
-/// - Perfect for testing and demos
+/// Service class for handling Firebase Authentication
 class AuthService {
-  // Mock user storage (in production, use local storage or a backend)
-  final Map<String, Map<String, dynamic>> _users = {};
-  UserModel? _currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Get current user
-  UserModel? get currentUser => _currentUser;
+  UserModel? get currentUser {
+    final User? firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return null;
 
-  /// Stream of authentication state changes (simplified)
-  Stream<UserModel?> get authStateChanges async* {
-    yield _currentUser;
+    return UserModel(
+      uid: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      displayName: firebaseUser.displayName ?? '',
+      photoUrl: firebaseUser.photoURL,
+    );
+  }
+
+  /// Stream of authentication state changes
+  Stream<UserModel?> get authStateChanges {
+    return _auth.authStateChanges().map((User? firebaseUser) {
+      if (firebaseUser == null) return null;
+
+      return UserModel(
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? '',
+        displayName: firebaseUser.displayName ?? '',
+        photoUrl: firebaseUser.photoURL,
+      );
+    });
   }
 
   /// Sign up with email and password
@@ -29,96 +40,110 @@ class AuthService {
     required String password,
     required String fullName,
   }) async {
-    // Validate inputs
-    if (!isValidEmail(email)) {
-      throw AuthException('Invalid email address');
+    try {
+      // Validate inputs
+      if (!isValidEmail(email)) {
+        throw AuthException('Invalid email address');
+      }
+
+      final passwordError = validatePassword(password);
+      if (passwordError != null) {
+        throw AuthException(passwordError);
+      }
+
+      // Create user with Firebase Auth
+      final UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Update user profile with display name
+      await userCredential.user?.updateDisplayName(fullName);
+      await userCredential.user?.reload();
+
+      final User? firebaseUser = _auth.currentUser;
+
+      if (firebaseUser == null) {
+        throw AuthException('Failed to create user account');
+      }
+
+      return UserModel(
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        displayName: fullName,
+        photoUrl: firebaseUser.photoURL,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_getFirebaseErrorMessage(e.code));
+    } catch (e) {
+      throw AuthException('An unexpected error occurred: ${e.toString()}');
     }
-
-    final passwordError = validatePassword(password);
-    if (passwordError != null) {
-      throw AuthException(passwordError);
-    }
-
-    // Check if user already exists
-    if (_users.containsKey(email)) {
-      throw AuthException('An account already exists with this email');
-    }
-
-    // Create new user
-    final uid = DateTime.now().millisecondsSinceEpoch.toString();
-    final user = UserModel(
-      uid: uid,
-      email: email,
-      displayName: fullName,
-      photoUrl: null,
-    );
-
-    // Store user credentials (in production, hash the password!)
-    _users[email] = {
-      'uid': uid,
-      'email': email,
-      'displayName': fullName,
-      'password':
-          password, // WARNING: Don't store plain text passwords in production!
-    };
-
-    _currentUser = user;
-    return user;
   }
 
   /// Sign in with email and password
   ///
-  /// BYPASS MODE: Accepts any email/password combination
-  /// No registration required - automatically creates user on first login
+  /// Throws [AuthException] if sign in fails
   Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    // BYPASS: Auto-create user if they don't exist
-    if (!_users.containsKey(email)) {
-      // Automatically register the user
-      final uid = DateTime.now().millisecondsSinceEpoch.toString();
-      _users[email] = {
-        'uid': uid,
-        'email': email,
-        'displayName': email.split('@')[0], // Use email prefix as name
-        'password': password,
-      };
+    try {
+      final UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final User? firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        throw AuthException('Failed to sign in');
+      }
+
+      return UserModel(
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        displayName: firebaseUser.displayName ?? email.split('@')[0],
+        photoUrl: firebaseUser.photoURL,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_getFirebaseErrorMessage(e.code));
+    } catch (e) {
+      throw AuthException('An unexpected error occurred: ${e.toString()}');
     }
-
-    // Create user model (bypass password check - accept any password)
-    final userData = _users[email]!;
-    _currentUser = UserModel(
-      uid: userData['uid'],
-      email: userData['email'],
-      displayName: userData['displayName'],
-      photoUrl: null,
-    );
-
-    return _currentUser!;
   }
 
   /// Sign out current user
   ///
   /// Throws [AuthException] if sign out fails
   Future<void> signOut() async {
-    _currentUser = null;
+    try {
+      await _auth.signOut();
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_getFirebaseErrorMessage(e.code));
+    } catch (e) {
+      throw AuthException('Failed to sign out: ${e.toString()}');
+    }
   }
 
-  /// Send password reset email (mock)
+  /// Send password reset email
   ///
   /// Throws [AuthException] if sending reset email fails
   Future<void> sendPasswordResetEmail(String email) async {
-    if (!_users.containsKey(email)) {
-      throw AuthException('No account found with this email');
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_getFirebaseErrorMessage(e.code));
+    } catch (e) {
+      throw AuthException(
+        'Failed to send password reset email: ${e.toString()}',
+      );
     }
-    // In production, send actual email
-    // For now, just simulate success
   }
 
   /// Check if user exists with given email
   Future<bool> checkUserExists(String email) async {
-    return _users.containsKey(email);
+    try {
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+      return methods.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Validate email format
@@ -127,15 +152,42 @@ class AuthService {
   }
 
   /// Validate password strength
-  ///
-  /// BYPASS MODE: Minimal validation - accepts any non-empty password
   static String? validatePassword(String password) {
     if (password.isEmpty) {
       return 'Password is required';
     }
-    // BYPASS: Accept any password as long as it's not empty
-    // Original requirement was 6+ chars, but now accepts any length
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
     return null;
+  }
+
+  /// Convert Firebase error codes to user-friendly messages
+  String _getFirebaseErrorMessage(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'An account already exists with this email';
+      case 'invalid-email':
+        return 'Invalid email address';
+      case 'operation-not-allowed':
+        return 'Email/password accounts are not enabled';
+      case 'weak-password':
+        return 'Password is too weak. Please use a stronger password';
+      case 'user-disabled':
+        return 'This account has been disabled';
+      case 'user-not-found':
+        return 'No account found with this email';
+      case 'wrong-password':
+        return 'Incorrect password';
+      case 'invalid-credential':
+        return 'Invalid email or password';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later';
+      case 'network-request-failed':
+        return 'Network error. Please check your connection';
+      default:
+        return 'Authentication failed. Please try again';
+    }
   }
 }
 

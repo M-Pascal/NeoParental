@@ -1,0 +1,40 @@
+mutation CreateUser @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  user_insert(data: {
+    displayName: "New User",
+    email: "newuser@example.com",
+    createdAt_expr: "request.time"
+  })
+}
+
+query ListInfants @auth(level: USER) {
+  infants {
+    id
+    name
+    dateOfBirth
+  }
+}
+
+mutation UpdateCryRecordingNotes($id: UUID!, $notes: String) @auth(level: USER) {
+  cryRecording_update(
+    id: $id,
+    data: {
+      notes: $notes
+    }
+  )
+}
+
+query GetCryAnalysis @auth(level: USER) {
+  cryAnalyses {
+    id
+    analyzedAt
+    confidenceLevel
+    cryRecording {
+      id
+      audioUrl
+    }
+    prediction {
+      id
+      name
+    }
+  }
+}

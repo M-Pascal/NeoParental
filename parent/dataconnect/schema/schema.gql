@@ -1,0 +1,39 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+}
+
+type Infant @table {
+  user: User!
+  name: String!
+  dateOfBirth: Date!
+  createdAt: Timestamp!
+  gender: String
+}
+
+type CryRecording @table {
+  infant: Infant!
+  audioUrl: String!
+  recordedAt: Timestamp!
+  durationSeconds: Int!
+  createdAt: Timestamp!
+  notes: String
+}
+
+type CryAnalysis @table {
+  cryRecording: CryRecording!
+  prediction: PredictionType!
+  confidenceLevel: Float!
+  analyzedAt: Timestamp!
+  createdAt: Timestamp!
+  userConfirmedReason: String
+  userNotes: String
+}
+
+type PredictionType @table {
+  name: String!
+  description: String
+  recommendedActions: String
+}
