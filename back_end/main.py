@@ -1,3 +1,4 @@
+# Essential imports
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,18 +13,14 @@ from typing import Dict, Optional
 from datetime import datetime
 import logging
 
-# -----------------------------
 # LOGGING CONFIGURATION
-# -----------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# -----------------------------
 # FASTAPI APP SETUP
-# -----------------------------
 app = FastAPI(
     title="NeoParental Prediction API",
-    description="API for predicting audio sound classes using a trained DecisionTreeRegressor model",
+    description="API for predicting audio sound classes using a best_trained model",
     version="2.2.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -38,9 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
 # DIRECTORIES & PATHS
-# -----------------------------
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "Model" / "saved_model"
 MODEL_PATH = MODEL_DIR / "best_model.joblib"
@@ -49,25 +44,21 @@ TEMP_DIR = BASE_DIR / "temp"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(exist_ok=True)
 
-# -----------------------------
 # GLOBAL VARIABLES
-# -----------------------------
 model = None
 model_type = None
 model_metadata = {}
 
-# Example labels (if regression approximates class indices)
+# Regression approximates class indices
 class_labels = {
-    0: "belly_pain",
-    1: "burping",
-    2: "discomfort",
-    3: "hungry",
-    4: "tired"
+    0: "Belly_pain",
+    1: "Burping",
+    2: "Discomfort",
+    3: "Hungry",
+    4: "Tired/Sleepy"
 }
 
-# -----------------------------
 # RESPONSE MODELS
-# -----------------------------
 class PredictionResponse(BaseModel):
     prediction_value: float
     predicted_label: Optional[str]
@@ -81,9 +72,7 @@ class HealthResponse(BaseModel):
     model_metadata: Dict
     timestamp: str
 
-# -----------------------------
 # MODEL LOADING
-# -----------------------------
 def load_model():
     global model, model_type, model_metadata
     try:
@@ -105,9 +94,7 @@ def load_model():
         model_metadata = {"error": str(e)}
         raise
 
-# -----------------------------
-# FEATURE EXTRACTION (MATCH TRAINING)
-# -----------------------------
+# FEATURE EXTRACTION
 def extract_audio_features(file_path: Path) -> np.ndarray:
     """
     Extract features using the same parameters and sequence 
@@ -159,9 +146,7 @@ def extract_audio_features(file_path: Path) -> np.ndarray:
         logger.error(f"Feature extraction error: {e}")
         raise HTTPException(status_code=400, detail=f"Feature extraction failed: {e}")
 
-# -----------------------------
 # FILE VALIDATION & CLEANUP
-# -----------------------------
 def validate_audio_file(file: UploadFile) -> bool:
     allowed_extensions = {'.wav', '.mp3', '.m4a', '.flac', '.ogg', '.aac'}
     return Path(file.filename).suffix.lower() in allowed_extensions
@@ -174,17 +159,13 @@ async def cleanup_file(file_path: Path):
     except Exception as e:
         logger.warning(f"Failed to delete {file_path}: {e}")
 
-# -----------------------------
 # STARTUP EVENT
-# -----------------------------
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting NeoParental Prediction API...")
     load_model()
 
-# -----------------------------
 # ENDPOINTS
-# -----------------------------
 @app.get("/", response_model=HealthResponse)
 async def root():
     return HealthResponse(
@@ -237,9 +218,7 @@ async def predict_audio(background_tasks: BackgroundTasks, file: UploadFile = Fi
     finally:
         background_tasks.add_task(cleanup_file, temp_file)
 
-# -----------------------------
 # ERROR HANDLER
-# -----------------------------
 @app.exception_handler(Exception)
 async def general_exception_handler(_, exc: Exception):
     logger.error(f"Unhandled error: {exc}")
@@ -252,8 +231,6 @@ async def general_exception_handler(_, exc: Exception):
         }
     )
 
-# -----------------------------
 # RUN SERVER
-# -----------------------------
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False, log_level="info")
