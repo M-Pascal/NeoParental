@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 # FASTAPI APP SETUP
 app = FastAPI(
     title="NeoParental Prediction API",
-    description="API for predicting audio sound classes using a best_trained model",
-    version="2.2.0",
+    description="API for predicting baby cry sound classes using the best trained model",
+    version="2.3.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# Enable CORS (configure properly for production)
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,7 +49,7 @@ model = None
 model_type = None
 model_metadata = {}
 
-# Regression approximates class indices
+# CLASS LABELS
 class_labels = {
     0: "Belly_pain",
     1: "Burping",
@@ -62,6 +62,7 @@ class_labels = {
 class PredictionResponse(BaseModel):
     prediction_value: float
     predicted_label: Optional[str]
+    confidence: Optional[float]
     processing_time: float
     timestamp: str
 
@@ -79,13 +80,21 @@ def load_model():
         if MODEL_PATH.exists():
             logger.info(f"Loading model from: {MODEL_PATH}")
             model = joblib.load(MODEL_PATH)
-            model_type = "DecisionTreeRegressor"
+
+            # Detect model type dynamically
+            model_class_name = model.__class__.__name__
+            if "Classifier" in model_class_name:
+                model_type = "classifier"
+            else:
+                model_type = "regressor"
+
             model_metadata = {
                 "type": model_type,
+                "class": model_class_name,
                 "path": str(MODEL_PATH),
                 "library": "scikit-learn"
             }
-            logger.info("Model loaded successfully.")
+            logger.info(f"Model loaded successfully: {model_class_name}")
         else:
             logger.error("No model file found in Model/saved_model/")
             model_metadata = {"error": "Model file not found"}
@@ -96,52 +105,39 @@ def load_model():
 
 # FEATURE EXTRACTION
 def extract_audio_features(file_path: Path) -> np.ndarray:
-    """
-    Extract features using the same parameters and sequence 
-    as during model training.
-    """
     try:
-        # Must match the training parameters
         n_mfcc = 40
         n_fft = 1024
-        hop_length = 10*16
-        win_length = 25*16
+        hop_length = 10 * 16
+        win_length = 25 * 16
         window = 'hann'
         n_mels = 128
         n_bands = 7
         fmin = 100
 
-        # Load the audio
         y, sr = librosa.load(file_path, sr=16000)
 
-        # Extract same features as in training
         mfcc = np.mean(librosa.feature.mfcc(
-            y=y, sr=sr, n_mfcc=40, n_fft=n_fft,
+            y=y, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft,
             hop_length=hop_length, win_length=win_length,
             window=window
         ).T, axis=0)
 
         mel = np.mean(librosa.feature.melspectrogram(
-            y=y, sr=sr, n_fft=n_fft,
-            hop_length=hop_length, win_length=win_length,
-            window='hann', n_mels=n_mels
+            y=y, sr=sr, n_fft=n_fft, hop_length=hop_length,
+            win_length=win_length, window='hann', n_mels=n_mels
         ).T, axis=0)
 
         stft = np.abs(librosa.stft(y))
         chroma = np.mean(librosa.feature.chroma_stft(S=stft, y=y, sr=sr).T, axis=0)
-
         contrast = np.mean(librosa.feature.spectral_contrast(
-            S=stft, y=y, sr=sr, n_fft=n_fft,
-            hop_length=hop_length, win_length=win_length,
-            n_bands=n_bands, fmin=fmin
+            S=stft, y=y, sr=sr, n_fft=n_fft, hop_length=hop_length,
+            win_length=win_length, n_bands=n_bands, fmin=fmin
         ).T, axis=0)
-
         tonnetz = np.mean(librosa.feature.tonnetz(y=y, sr=sr).T, axis=0)
 
-        # Concatenate features in the same order as training
         features = np.concatenate((mfcc, chroma, mel, contrast, tonnetz))
         return features.reshape(1, -1)
-
     except Exception as e:
         logger.error(f"Feature extraction error: {e}")
         raise HTTPException(status_code=400, detail=f"Feature extraction failed: {e}")
@@ -165,7 +161,7 @@ async def startup_event():
     logger.info("Starting NeoParental Prediction API...")
     load_model()
 
-# ENDPOINTS
+# HEALTH CHECK
 @app.get("/", response_model=HealthResponse)
 async def root():
     return HealthResponse(
@@ -180,9 +176,10 @@ async def root():
 async def health_check():
     return await root()
 
+# PREDICTION ENDPOINT
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_audio(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
-    """Predict baby cry category using a trained DecisionTreeRegressor."""
+    """Predict baby cry category using the trained model."""
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded.")
     if not validate_audio_file(file):
@@ -195,19 +192,29 @@ async def predict_audio(background_tasks: BackgroundTasks, file: UploadFile = Fi
         contents = await file.read()
         if len(contents) > 10 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="File exceeds 10MB limit.")
-
         with open(temp_file, "wb") as f:
             f.write(contents)
 
         features = extract_audio_features(temp_file)
-        prediction = float(model.predict(features)[0])
 
-        # Optionally, map to label (if numeric index)
-        predicted_label = class_labels.get(round(prediction), None)
+        # Prediction + confidence handling
+        if model_type == "classifier":
+            probs = model.predict_proba(features)[0]
+            pred_index = int(np.argmax(probs))
+            confidence = float(np.max(probs))
+            prediction_value = pred_index
+            predicted_label = class_labels.get(pred_index, None)
+
+        else:  # Regressor
+            prediction_value = float(model.predict(features)[0])
+            predicted_label = class_labels.get(round(prediction_value), None)
+            # Simulate confidence based on proximity to integer class
+            confidence = max(0.0, 1.0 - abs(prediction_value - round(prediction_value)))
 
         return PredictionResponse(
-            prediction_value=prediction,
+            prediction_value=prediction_value,
             predicted_label=predicted_label,
+            confidence=round(confidence * 100, 2),
             processing_time=(datetime.now() - start_time).total_seconds(),
             timestamp=datetime.now().isoformat()
         )
